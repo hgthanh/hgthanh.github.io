@@ -19,15 +19,47 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
 
-    - name: Install dependencies 📦
+    - name: Check for package-lock.json 📋
+      id: check-lock
+      run: |
+        if [ -f package-lock.json ]; then
+          echo "lock-exists=true" >> $GITHUB_OUTPUT
+          echo "✅ package-lock.json found"
+        else
+          echo "lock-exists=false" >> $GITHUB_OUTPUT
+          echo "⚠️ package-lock.json not found, will be generated"
+        fi
+
+    - name: Install dependencies (with lock) 📦
+      if: steps.check-lock.outputs.lock-exists == 'true'
       run: npm ci
+
+    - name: Install dependencies (without lock) 📦
+      if: steps.check-lock.outputs.lock-exists == 'false'
+      run: |
+        npm install
+        echo "✅ Generated package-lock.json"
+
+    - name: Commit package-lock.json if generated 💾
+      if: steps.check-lock.outputs.lock-exists == 'false'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add package-lock.json
+        git diff --staged --quiet || git commit -m "chore: add package-lock.json [skip ci]"
+        git push || echo "No changes to commit"
+
+    - name: Run tests 🧪
+      run: npm test -- --coverage --watchAll=false
 
     - name: Build 🔧
       run: npm run build
       env:
         REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
         REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+        CI: false
 
     - name: Deploy 🚀
       uses: peaceiris/actions-gh-pages@v3
@@ -35,3 +67,4 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build
+        cname: # Add your custom domain here if you have one
