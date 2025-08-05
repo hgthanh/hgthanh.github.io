@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-json",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.sublime-keybindings",
+    "ritwickdey.liveserver",
+    "ms-vscode.vscode-typescript-next",
+    "gruntfuggly.todo-tree",
+    "yzhang.markdown-all-in-one"
+  ]
+}
