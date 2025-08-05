@@ -32,9 +32,24 @@ fi
 
 echo "✅ Git detected"
 
-# Install dependencies
+# Clean and install dependencies
 echo "📦 Installing dependencies..."
-npm install
+if [ -f package-lock.json ]; then
+    echo "   Using existing package-lock.json..."
+    npm ci
+else
+    echo "   Creating package-lock.json..."
+    npm install
+fi
+
+# Verify package-lock.json was created
+if [ ! -f package-lock.json ]; then
+    echo "❌ package-lock.json was not created. Running npm install again..."
+    rm -rf node_modules
+    npm install
+fi
+
+echo "✅ package-lock.json created successfully"
 
 # Create .env file if it doesn't exist
 if [ ! -f .env ]; then
